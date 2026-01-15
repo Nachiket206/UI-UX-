@@ -1,0 +1,908 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Retail Ethnography | Decathlon vs Reliance</title>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;600&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-dark: #0f1115;
+            --card-surface: #181b21;
+            --decathlon-blue: #36b3e8;
+            --reliance-red: #ff4757;
+            --text-main: #ffffff;
+            --text-muted: #9ca3af;
+            --border: #2d3342;
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            padding: 0;
+            overflow-x: hidden;
+        }
+
+        h1, h2, h3 { font-family: 'Space Grotesk', sans-serif; margin: 0; }
+        
+        /* HERO SECTION */
+        header {
+            height: 60vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            background: radial-gradient(circle at center, #1f232b 0%, #0f1115 70%);
+            border-bottom: 1px solid var(--border);
+            padding: 20px;
+        }
+
+        header h1 { font-size: 4rem; letter-spacing: -2px; margin-bottom: 10px; }
+        header p { color: var(--text-muted); font-size: 1.2rem; max-width: 600px; }
+
+        .container { max-width: 1400px; margin: 0 auto; padding: 60px 40px; }
+
+        /* SECTION HEADERS */
+        .section-header {
+            display: flex;
+            align-items: baseline;
+            gap: 20px;
+            margin-bottom: 40px;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 20px;
+            margin-top: 80px;
+        }
+        
+        .section-badge {
+            background: #333;
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* GRIDS */
+        .respondent-grid, .obs-grid {
+            display: grid;
+            gap: 20px;
+        }
+        
+        .respondent-grid { grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); }
+        .obs-grid { grid-template-columns: 1fr 1fr; }
+
+        /* GALLERY GRID (New) */
+        .gallery-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+
+        /* CARDS */
+        .card {
+            background: var(--card-surface);
+            border-radius: 12px;
+            padding: 12px;
+            cursor: pointer;
+            transition: transform 0.2s ease, border-color 0.2s ease;
+            border: 1px solid transparent;
+            text-align: center;
+        }
+
+        .card:hover { transform: translateY(-5px); border-color: var(--text-muted); }
+        .card img { width: 100%; aspect-ratio: 1/1; object-fit: cover; border-radius: 8px; margin-bottom: 12px; filter: grayscale(30%); }
+        .card:hover img { filter: grayscale(0%); }
+        .card-name { font-weight: 600; font-size: 0.9rem; }
+        .card-meta { font-size: 0.75rem; color: var(--text-muted); margin-top: 5px; }
+
+        /* GALLERY CARDS */
+        .gallery-card {
+            background: var(--card-surface);
+            border-radius: 12px;
+            overflow: hidden;
+            border: 1px solid var(--border);
+        }
+        .gallery-card img, .gallery-card video { width: 100%; display: block; }
+        .gallery-card video { height: 250px; object-fit: cover; background: black; }
+        .gallery-label { padding: 15px; font-size: 0.9rem; color: var(--text-muted); text-align: center; }
+
+        /* Special Style for Observation/Analytics Cards (Button Look) */
+        .obs-card-btn {
+            background: #23272e;
+            padding: 40px;
+            border: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            min-height: 200px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .obs-card-btn:hover { background: #2a2e36; }
+        .obs-card-btn .card-name { font-size: 1.5rem; margin-bottom: 10px; color: var(--text-main); }
+        .obs-card-btn .card-meta { font-size: 1rem; color: var(--decathlon-blue); }
+        .obs-card-btn.rel .card-meta { color: var(--reliance-red); }
+
+        /* MODAL STYLES */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.95);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .modal-overlay.active { display: flex; opacity: 1; }
+
+        .modal-content {
+            background: #121418;
+            width: 90%;
+            max-width: 1100px;
+            height: 85vh;
+            border-radius: 20px;
+            display: flex;
+            overflow: hidden;
+            border: 1px solid var(--border);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        }
+
+        .modal-left {
+            flex: 1;
+            background: #000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        .modal-left img { width: 100%; height: 100%; object-fit: contain; }
+
+        .modal-right {
+            flex: 1;
+            padding: 40px;
+            overflow-y: auto;
+        }
+
+        /* Full Width Modal for Observations/Analytics (No Image Column) */
+        .modal-full-width .modal-left { display: none !important; } 
+        .modal-full-width .modal-right { flex: 100%; padding: 60px; }
+        
+        /* Modal Internal Layouts */
+        .obs-data-row { margin-bottom: 15px; border-bottom: 1px solid #333; padding-bottom: 15px; display: grid; grid-template-columns: 200px 1fr; }
+        .obs-label { color: var(--text-muted); font-weight: 600; }
+        .obs-value { color: var(--text-main); }
+        .obs-notes-box { background: #1a1d21; padding: 30px; border-radius: 12px; margin-top: 30px; line-height: 1.8; color: #ddd; border-left: 4px solid var(--decathlon-blue); margin-bottom: 30px;}
+        
+        /* Grid for graphs inside modal */
+        .modal-graph-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin: 30px 0; }
+        .modal-graph-grid img { width: 100%; border-radius: 8px; border: 1px solid #333; }
+
+        .modal-close {
+            position: absolute;
+            top: 20px; right: 20px;
+            background: rgba(255,255,255,0.1);
+            border: none;
+            color: white;
+            width: 40px; height: 40px;
+            border-radius: 50%;
+            font-size: 20px;
+            cursor: pointer;
+        }
+
+        .q-block { margin-bottom: 25px; border-bottom: 1px solid #2d3342; padding-bottom: 15px; }
+        .q-label { color: var(--text-muted); font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; display: block; }
+        .q-answer { font-size: 1.1rem; font-weight: 400; color: var(--text-main); line-height: 1.6; }
+        
+        .brand-tag {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            margin-bottom: 20px;
+        }
+        .tag-decathlon { background: rgba(54, 179, 232, 0.2); color: var(--decathlon-blue); }
+        .tag-reliance { background: rgba(255, 71, 87, 0.2); color: var(--reliance-red); }
+
+        /* Responsive Fixes */
+        @media (max-width: 900px) {
+            .obs-grid { grid-template-columns: 1fr; }
+            .modal-content { flex-direction: column; overflow-y: auto; }
+            .modal-left { height: 300px; flex: none; }
+            .modal-right { flex: none; }
+            .obs-data-row { grid-template-columns: 1fr; gap: 5px; }
+            .modal-graph-grid { grid-template-columns: 1fr; }
+        }
+
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>User Research Study Group 5</h1>
+        <p>A comparative ethnography of shopping behaviors at Decathlon vs. Reliance Mart.</p>
+    </header>
+
+    <div class="container">
+
+        <div class="section-header">
+            <h2>01. Field Observations</h2>
+            <span class="section-badge">Fly on the wall</span>
+        </div>
+        <div class="obs-grid" id="observation-grid"></div>
+
+        <div class="grid-section">
+            <div class="section-header">
+                <h2>02. Decathlon Interviews</h2>
+                <span class="section-badge" style="color: var(--decathlon-blue)">N=10</span>
+            </div>
+            <div class="respondent-grid" id="decathlon-grid"></div>
+        </div>
+
+        <div class="grid-section">
+            <div class="section-header">
+                <h2>03. Reliance Interviews</h2>
+                <span class="section-badge" style="color: var(--reliance-red)">N=10</span>
+            </div>
+            <div class="respondent-grid" id="reliance-grid"></div>
+        </div>
+
+        <div class="grid-section">
+            <div class="section-header">
+                <h2>04. Survey Analytics</h2>
+                <span class="section-badge">Google Forms Data</span>
+            </div>
+            <div class="obs-grid" id="analytics-grid"></div>
+        </div>
+
+        <div class="grid-section">
+            <div class="section-header">
+                <h2>05. Project Gallery</h2>
+                <span class="section-badge">Media</span>
+            </div>
+            
+            <h3 style="margin-bottom: 20px; color: var(--text-muted);">Additional Photos</h3>
+            <div class="gallery-grid" id="gallery-photos"></div>
+
+            <h3 style="margin-bottom: 20px; color: var(--text-muted); margin-top: 40px;">Field Videos</h3>
+            <div class="gallery-grid" id="gallery-videos"></div>
+        </div>
+
+    </div>
+
+    <div class="modal-overlay" id="modal">
+        <button class="modal-close" onclick="closeModal()">×</button>
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <div class="modal-left">
+                <img id="m-img" src="" alt="Geotagged Proof">
+            </div>
+            <div class="modal-right">
+                <span id="m-badge" class="brand-tag"></span>
+                <h2 id="m-name" style="margin-bottom: 30px;"></h2>
+                <div id="m-questions"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ===========================================
+        // 1. OBSERVATION DATA 
+        // ===========================================
+        const observationData = [
+            {
+                name: "Decathlon Observation",
+                type: "Observation",
+                brand: "Decathlon",
+                meta: {
+                    "Location": "Decathlon",
+                    "Method Used": "Fly-on-the-Wall (Non-intrusive Observation)",
+                    "Duration": "~30–40 minutes",
+                    "Observer Role": "Passive observer (no interaction)"
+                },
+                notes: `
+                    <strong>1. Activities</strong><br>
+                    • A middle-aged man was trying running shoes with the help of a staff member, jogging around the aisle to test comfort.<br>
+                    • One individual in the cycle section was closely examining bicycles, comparing components and specifications.<br>
+                    • A father and son were casually playing cricket between the aisles, using store equipment.<br>
+                    • An elderly foreign couple was being assisted by a staff member in the swimming section.<br>
+                    • Groups of college students were roaming the store, trying various products mainly for fun.<br><br>
+
+                    <strong>2. Environment</strong><br>
+                    The store environment was open, spacious, and interactive. Sections were clearly divided (running, cycling, swimming), making activities context-specific. The atmosphere was friendly and informal, with no visible restriction on trial usage.<br><br>
+
+                    <strong>3. Interactions</strong><br>
+                    • <em>User–Staff:</em> Staff assisted users patiently, especially in technical areas.<br>
+                    • <em>User–Product:</em> Users actively tested products (jogging, playing cricket).<br>
+                    • <em>User–User:</em> Social interaction was common, especially among families and students.<br><br>
+
+                    <strong>4. Objects</strong><br>
+                    Running shoes, cycles, cricket bats, balls, swimming accessories. Open aisles were used as informal testing spaces.<br><br>
+
+                    <strong>5. Users</strong><br>
+                    Middle-aged fitness customers, hobbyist cyclists, families, elderly customers, and college students.<br><br>
+
+                    <strong>Key Insights</strong><br>
+                    Decathlon functions as an experience-driven environment. Product trials significantly increase user satisfaction. Different user groups use the same space in very different ways—functional, playful, social, or expert-driven.
+                `
+            },
+            {
+                name: "Reliance Observation",
+                type: "Observation",
+                brand: "Reliance",
+                meta: {
+                    "Location": "Reliance Mall",
+                    "Method Used": "Fly-on-the-Wall (Non-intrusive Observation)",
+                    "Duration": "~30–40 minutes",
+                    "Observer Role": "Passive observer (no interaction)"
+                },
+                notes: `
+                    <strong>1. Activities</strong><br>
+                    • Shoppers were primarily browsing aisles, checking brands, prices, and packaging details.<br>
+                    • Many users actively searched for offers and discounts, pausing near promotional signage.<br>
+                    • Families shopped together, while some middle-aged individuals shopped alone.<br>
+                    • A few parents allowed their child to spend time in the play area, using it as a short break during shopping.<br>
+                    • Before checkout, users paused to scan multiple billing counters and moved toward the shortest queue.<br>
+                    • While waiting in queues, some customers engaged in conversation, while others used their phones.<br><br>
+
+                    <strong>2. Environment</strong><br>
+                    The mall environment was crowded and utility-focused, designed for routine and necessity-based shopping. Aisles were packed with products, making comparison easy but sometimes slowing movement. Offer signage and price labels were visually prominent. The presence of a children’s play area created a family-friendly atmosphere.<br><br>
+
+                    <strong>3. Interactions</strong><br>
+                    • <em>User–Product:</em> Shoppers frequently picked up products, compared prices, checked expiry dates, and evaluated brands.<br>
+                    • <em>User–User:</em> Spouses and family members discussed purchasing decisions; wives were often leading choices while husbands followed.<br>
+                    • <em>User–System:</em> Shopping carts played a major role; broken or poorly maintained carts caused visible struggle, especially for solo shoppers.<br><br>
+
+                    <strong>4. Objects</strong><br>
+                    Shopping carts (some broken), product shelves, promotional boards, checkout counters, and children’s play area equipment.<br><br>
+
+                    <strong>5. Users</strong><br>
+                    Middle-aged adults, families with children, solo shoppers (particularly women), and price-conscious users.<br><br>
+
+                    <strong>Key Insights</strong><br>
+                    Reliance Mall shopping is task-oriented and price-driven. Offer visibility influences movement. Cart usability directly affects comfort. Checkout waiting time is a critical moment where boredom, impatience, or social interaction becomes visible.
+                `
+            }
+        ];
+
+
+        // ===========================================
+        // 2. DECATHLON INTERVIEW DATA
+        // ===========================================
+        const decathlonData = [
+            {
+                id: 1,
+                name: "Nilesh Chavan",
+                image: "images/nilesh.jpeg", 
+                answers: {
+                    "Age Group": "35-54",
+                    "Gender": "Male",
+                    "Visit Frequency": "Frequently (monthly or more)",
+                    "Primary Reason": "Buying sports equipment",
+                    "First Action": "Check signboards/categories",
+                    "Ease of Finding (1-5)": "5 (Very difficult)",
+                    "Decision Factor": "Price & offers",
+                    "Difficulties Faced": "No",
+                    "Improvement": "All is good"
+                }
+            },
+            {
+                id: 2,
+                name: "Om Shirole",
+                image: "images/om.jpeg",
+                answers: {
+                    "Age Group": "18-24",
+                    "Email": "omshirole77@gmail.com",
+                    "Gender": "Male",
+                    "Visit Frequency": "First time",
+                    "Primary Reason": "Just accompanying someone",
+                    "First Action": "Look around on my own",
+                    "Ease of Finding (1-5)": "2 (somewhat easy)",
+                    "Decision Factor": "Price & Offers, Online reviews",
+                    "Difficulties Faced": "No, I did not",
+                    "Improvement": "I dont think they need improvement"
+                }
+            },
+            {
+                id: 3,
+                name: "Babasaheb Kharpude",
+                image: "images/baba.jpeg",
+                answers: {
+                    "Age Group": "35-44",
+                    "Gender": "Male",
+                    "Email": "babakharpude@gmail.com",
+                    "Visit Frequency": "Ocassioanly (once every few months)",
+                    "Primary Reason": "Browsing and Just accompanying someone",
+                    "First Action": "Look around on my own",
+                    "Ease of Finding (1-5)": "2 (somewhat easy)",
+                    "Decision Factor": "Price & Offers, Online reviews",
+                    "Difficulties Faced": "No, I am just with my friend",
+                    "Improvement": "I dont think there are any"
+                }
+            },
+            {
+                id: 4,
+                name: "Dhaval",
+                image: "images/dhaval.jpeg",
+                answers: {
+                    "Age Group": "18-24",
+                    "Gender": "Male",
+                    "Visit Frequency": "Ocassioanly (once every few months)",
+                    "Primary Reason": "Buying sports equipment, Browsing, Trying out products",
+                    "First Action": "Look around on my own",
+                    "Ease of Finding (1-5)": "1 (very easy)",
+                    "Decision Factor": "Price & Offers, Product Trials",
+                    "Difficulties Faced": "I knew what i wanted, it was very easy",
+                    "Improvement": "I had difficulty finding the trial equipment, had to ask staff"
+                }
+            },
+            {
+                id: 5,
+                name: "Advait Gajare",
+                image: "images/advait.jpeg",
+                answers: {
+                    "Age Group": "Under 18",
+                    "Gender": "Male",
+                    "Visit Frequency": "Ocassioanly (once every few months)",
+                    "Primary Reason": "Browsing, Trying out products, Just accompanying someone",
+                    "First Action": "Check signboards/categories",
+                    "Ease of Finding (1-5)": "1 (very easy)",
+                    "Decision Factor": "Price & Offers, Online reviews",
+                    "Difficulties Faced": "No not really",
+                    "Improvement": "I think all is good"
+                }
+            },
+            {
+                id: 6,
+                name: "Ayush Zende",
+                image: "images/ayush.jpeg",
+                answers: {
+                    "Age Group": "18-24",
+                    "Gender": "Male",
+                    "Email": "ayushzende5027@gmail.com",
+                    "Visit Frequency": "Frequently (monthly or more)",
+                    "Primary Reason": "Buying sports equipment, Trying out products",
+                    "First Action": "Go directly to the section I want",
+                    "Ease of Finding (1-5)": "1 (very easy)",
+                    "Decision Factor": "Price & Offers, Product information Labels",
+                    "Difficulties Faced": "Confused between two products of similar price",
+                    "Improvement": "The staff could be more proactive in helping"
+                }
+            },
+            {
+                id: 7,
+                name: "Sanskar Satapure",
+                image: "images/sanskar.jpeg",
+                answers: {
+                    "Age Group": "18-24",
+                    "Gender": "Male",
+                    "Email": "satapuresanskar18@gmail.com",
+                    "Visit Frequency": "Ocassioanly (once every few months)",
+                    "Primary Reason": "Trying out products, Just accompanying someone",
+                    "First Action": "Look around on my own",
+                    "Ease of Finding (1-5)": "3 (I can manage)",
+                    "Decision Factor": "Online reviews",
+                    "Difficulties Faced": "The price was not convincing to me",
+                    "Improvement": "They should have better offers"
+                }
+            },
+            {
+                id: 8,
+                name: "Dharan",
+                image: "images/dharan.jpeg",
+                answers: {
+                    "Age Group": "25-35",
+                    "Gender": "Male",
+                    "Visit Frequency": "Ocassioanly (once every few months)",
+                    "Primary Reason": "Browsing, Returning/Exchanging a product",
+                    "First Action": "Look around on my own",
+                    "Ease of Finding (1-5)": "2 (easy)",
+                    "Decision Factor": "Product trial and demo, price & offers",
+                    "Difficulties Faced": "It took them time to process my return/exchange",
+                    "Improvement": "Find a better solution to make returns faster"
+                }
+            },
+            {
+                id: 9,
+                name: "Tanmay Thorat",
+                image: "images/tanmay.jpeg",
+                answers: {
+                    "Age Group": "25-35",
+                    "Gender": "Male",
+                    "Email": "tanmaythorat140@gmail.com",
+                    "Visit Frequency": "Frequently (monthly or more)",
+                    "Primary Reason": "Buying sports equipment",
+                    "First Action": "Go directly to the section I want",
+                    "Ease of Finding (1-5)": "1 (very easy)",
+                    "Decision Factor": "Product demo, price & offers, product info",
+                    "Difficulties Faced": "Not in general, it is a well maintained store",
+                    "Improvement": "Add more products for minority sports"
+                }
+            },
+            {
+                id: 10,
+                name: "Decathlon Person 10",
+                image: "images/d10.jpg",
+                answers: { "Status": "Data Pending" }
+            }
+        ];
+
+        // ===========================================
+        // 3. RELIANCE INTERVIEW DATA
+        // ===========================================
+        const relianceData = [
+            {
+                id: 1,
+                name: "Avainash Honrao",
+                image: "images/avainash.jpeg",
+                answers: {
+                    "Age Group": "18-24",
+                    "Gender": "Male",
+                    "Email": "avainashhonare4072@gmail.com",
+                    "Preferred Time": "Morning (8-11 AM)",
+                    "Layout Familiarity": "I visit ocassionally",
+                    "What Helped Locate?": "Section labels",
+                    "Checkout Experience": "Smooth and quick",
+                    "Most Mental Effort": "Nothing",
+                    "Suggested Change": "Nothing"
+                }
+            },
+            {
+                id: 2,
+                name: "Dipak Bhalerao",
+                image: "images/dipak.jpeg",
+                answers: {
+                    "Age Group": "25-35",
+                    "Email": "bhaleraodipak178@gmail.com",
+                    "Gender": "Male",
+                    "Preferred Time": "Morning (8-11 AM)",
+                    "Layout Familiarity": "I have visited few times",
+                    "What Helped Locate?": "Product Arrangement",
+                    "Checkout Experience": "Smooth and quick",
+                    "Most Mental Effort": "Everything is alright",
+                    "Suggested Change": "No complains"
+                }
+            },
+            {
+                id: 3,
+                name: "Balaji Sontakke",
+                image: "images/balaji.jpeg",
+                answers: {
+                    "Age Group": "35-44",
+                    "Gender": "Male",
+                    "Preferred Time": "Morning (8-11 AM)",
+                    "Layout Familiarity": "This was my first visit somewhat",
+                    "What Helped Locate?": "Section Labels, Staff Assistance",
+                    "Checkout Experience": "Smooth and quick",
+                    "Most Mental Effort": "Locating specific products",
+                    "Suggested Change": "Improve checkout experience"
+                }
+            },
+            {
+                id: 5,
+                name: "Shivram",
+                image: "images/shivram.jpg",
+                answers: {
+                    "Age Group": "25-35",
+                    "Email": "shivramraju999@gmail.com",
+                    "Gender": "Male",
+                    "Preferred Time": "Afternoon (11 AM - 4 PM)",
+                    "Layout Familiarity": "I have visited few times",
+                    "What Helped Locate?": "I struggle to locate items",
+                    "Checkout Experience": "Smooth and quick",
+                    "Most Mental Effort": "Finding small items like spices",
+                    "Suggested Change": "Sign boards for sections"
+                }
+            },
+            {
+                id: 6,
+                name: "Renu Tyagi",
+                image: "images/pratik.jpeg",
+                answers: {
+                    "Age Group": "45+",
+                    "Gender": "Female",
+                    "Preferred Time": "Morning (8-11 AM)",
+                    "Layout Familiarity": "I visit ocassionally",
+                    "What Helped Locate?": "Product Arrangement",
+                    "Checkout Experience": "Slightly delayed",
+                    "Most Mental Effort": "Checkout line took time",
+                    "Suggested Change": "Self checkout systems"
+                }
+            },
+            {
+                id: 7,
+                name: "Namita Thete",
+                image: "images/namita.jpeg",
+                answers: {
+                    "Age Group": "35 - 44",
+                    "Gender": "Female",
+                    "Preferred Time": "Afternoon (11 AM - 4 PM)",
+                    "Layout Familiarity": "I visit regularly",
+                    "What Helped Locate?": "Section labels, prior experience",
+                    "Checkout Experience": "Slightly delayed",
+                    "Most Mental Effort": "I know what I want and shop quickly",
+                    "Suggested Change": "Checkout area for small purchases"
+                }
+            },
+            {
+                id: 8,
+                name: "Sidhant",
+                image: "images/sid.jpeg",
+                answers: {
+                    "Age Group": "18-24",
+                    "Gender": "Male",
+                    "Preferred Time": "Evening (4-8 PM)",
+                    "Layout Familiarity": "I visited a few times",
+                    "What Helped Locate?": "Section labels, staff assistance",
+                    "Checkout Experience": "Stressful",
+                    "Most Mental Effort": "Waiting in long line",
+                    "Suggested Change": "Faster checkout for fewer items"
+                }
+            },
+            {
+                id: 9,
+                name: "Navita There",
+                image: "images/navita.jpeg",
+                answers: {
+                    "Age Group": "35-44",
+                    "Gender": "Female",
+                    "Preferred Time": "Morning (8-11 AM)",
+                    "Layout Familiarity": "I visit regularly",
+                    "What Helped Locate?": "Section labels, prior experience",
+                    "Checkout Experience": "Smooth and quick",
+                    "Most Mental Effort": "Most carts are broken",
+                    "Suggested Change": "Maintenance check on carts"
+                }
+            },
+            {
+                id: 10,
+                name: "Pratik",
+                image: "images/pratik.jpeg",
+                answers: {
+                    "Age Group": "45+",
+                    "Gender": "Male",
+                    "Preferred Time": "Afternoon (11 AM - 4 PM)",
+                    "Layout Familiarity": "I visit ocassionally",
+                    "What Helped Locate?": "Prior experience, staff assistance",
+                    "Checkout Experience": "Slightly delayed",
+                    "Most Mental Effort": "Trouble finding items",
+                    "Suggested Change": "Better display boards"
+                }
+            }
+        ];
+
+        // ===========================================
+        // 4. ANALYTICS DATA 
+        // ===========================================
+        const analyticsData = [
+            {
+                name: "Decathlon Survey Analysis",
+                type: "Analytics",
+                brand: "Decathlon",
+                graphs: [
+                    "images/d_graph1.jpg", 
+                    "images/d_graph2.jpg", 
+                    "images/d_graph3.jpg",
+                    "images/d_graph4.jpg", 
+                    "images/d_graph5.jpg", 
+                    "images/d_graph6.jpg", 
+                    "images/d_graph7.jpg"
+                ],
+                text1: `
+                    <strong>Did you face any difficulties while shopping today?</strong><br><br>
+                    • <strong>Ease of Shopping:</strong> The majority of respondents indicated they did not face any difficulties, with some noting they knew what they wanted or that the store was small and well-maintained.<br>
+                    • <strong>Pricing & Quality:</strong> One respondent was confused about the quality of a product relative to its price, and another found the price unconvincing.<br>
+                    • <strong>Exchange Process:</strong> One respondent experienced a delay in the time it took to process an exchange.
+                `,
+                text2: `
+                    <strong>If you could improve ONE thing about your Decathlon experience?</strong><br><br>
+                    • <strong>Better Offers:</strong> Some respondents suggested Decathlon should have more offers.<br>
+                    • <strong>Product Selection:</strong> A need for more products in minority sports was mentioned, especially price-friendly equipment for hobbies.<br>
+                    • <strong>Staff & Assistance:</strong> One customer had difficulty finding trial equipment and another felt the staff was unconvincing about product quality.<br>
+                    • <strong>Process Speed:</strong> A suggestion was made to streamline processes to be faster.<br>
+                    • <strong>Satisfaction:</strong> Several responses indicated that "all is good" and no improvements were needed.
+                `
+            },
+            {
+                name: "Reliance Survey Analysis",
+                type: "Analytics",
+                brand: "Reliance",
+                graphs: [
+                    "images/r_graph1.jpg", 
+                    "images/r_graph2.jpg", 
+                    "images/r_graph3.jpg",
+                    "images/r_graph4.jpg", 
+                    "images/r_graph5.jpg", 
+                    "images/r_graph6.jpg"
+                ],
+                text1: `
+                    <strong>What part of the store required the most mental effort?</strong><br><br>
+                    • <strong>Locating Products:</strong> Finding specific products, especially small items like masale, was mentally taxing for respondents.<br>
+                    • <strong>Checkout Process:</strong> Waiting in a long checkout line took more time than expected and wasted time.<br>
+                    • <strong>Navigation & Offers:</strong> Finding offer prices was difficult due to disorganized offer boards.<br>
+                    • <strong>Equipment & Staff:</strong> Broken carts were difficult to handle, and some respondents disliked communicating with staff to find items.<br>
+                    • <strong>Ease of Shopping:</strong> One frequent shopper found the shopping process quick as they were familiar with the store.
+                `,
+                text2: `
+                    <strong>What is one small change that would noticeably improve your experience?</strong><br><br>
+                    • <strong>Checkout Experience:</strong> Respondents desire an improved, faster, and easier checkout process, particularly for those with a small number of items (e.g., self-checkout).<br>
+                    • <strong>Navigation & Display:</strong> Suggestions include better display boards and signs to point to product collections, reducing the need to ask staff.<br>
+                    • <strong>Staff Training:</strong> Better training for management staff was suggested.<br>
+                    • <strong>Maintenance:</strong> Respondents requested regular maintenance checks on shopping carts to replace broken ones.
+                `
+            }
+        ];
+
+        // ===========================================
+        // 5. GALLERY DATA (New!)
+        // ===========================================
+        const galleryPhotos = [
+            { src: "images/gallery_p1.jpeg", name: "Photo 1" },
+            { src: "images/gallery_p2.jpeg", name: "Photo 2" },
+            { src: "images/gallery_p3.jpeg", name: "Photo 3" }
+        ];
+
+        const galleryVideos = [
+            { src: "images/gallery_v1.mp4", name: "Video 1" },
+            { src: "images/gallery_v2.mp4", name: "Video 2" },
+            { src: "images/gallery_v3.mp4", name: "Video 3" },
+            { src: "images/gallery_v4.mp4", name: "Video 4" },
+            { src: "images/gallery_v5.mp4", name: "Video 5" },
+            { src: "images/gallery_v6.mp4", name: "Video 6" }
+        ];
+
+        // ===========================================
+        // RENDER LOGIC
+        // ===========================================
+
+        function renderGrid(data, containerId, type) {
+            const container = document.getElementById(containerId);
+            container.innerHTML = ''; 
+            
+            data.forEach((item) => {
+                const card = document.createElement('div');
+                
+                // Styling for Buttons (Observations & Analytics)
+                if (containerId === 'observation-grid' || containerId === 'analytics-grid') {
+                    card.className = (item.brand === 'Reliance') ? 'card obs-card-btn rel' : 'card obs-card-btn';
+                    card.innerHTML = `
+                        <div class="card-name">${item.name}</div>
+                        <div class="card-meta">Click to View Content</div>
+                    `;
+                } else {
+                    // Styling for Interview Cards
+                    card.className = 'card';
+                    card.innerHTML = `
+                        <img src="${item.image}" onerror="this.src='https://via.placeholder.com/400?text=Image+Not+Found'" alt="User">
+                        <div class="card-name">${item.name || item.id}</div>
+                        <div class="card-meta">View Interview</div>
+                    `;
+                }
+
+                card.onclick = () => openModal(item, type);
+                container.appendChild(card);
+            });
+        }
+
+        // Specific Render Function for the Gallery
+        function renderGallery() {
+            // Render Photos
+            const photoContainer = document.getElementById('gallery-photos');
+            galleryPhotos.forEach(item => {
+                const div = document.createElement('div');
+                div.className = 'gallery-card';
+                div.innerHTML = `<img src="${item.src}" alt="${item.name}" onerror="this.src='https://via.placeholder.com/400x300?text=Photo+Missing'"><div class="gallery-label">${item.name}</div>`;
+                photoContainer.appendChild(div);
+            });
+
+            // Render Videos
+            const videoContainer = document.getElementById('gallery-videos');
+            galleryVideos.forEach(item => {
+                const div = document.createElement('div');
+                div.className = 'gallery-card';
+                div.innerHTML = `<video controls><source src="${item.src}" type="video/mp4">Your browser does not support video.</video><div class="gallery-label">${item.name}</div>`;
+                videoContainer.appendChild(div);
+            });
+        }
+
+        function openModal(item, type) {
+            const modal = document.getElementById('modal');
+            const mImg = document.getElementById('m-img');
+            const mBadge = document.getElementById('m-badge');
+            const mName = document.getElementById('m-name');
+            const mQuestions = document.getElementById('m-questions');
+            const mContent = document.querySelector('.modal-content');
+            const mLeft = document.querySelector('.modal-left');
+
+            // --- RESET STATE ---
+            mBadge.className = 'brand-tag';
+            mBadge.style.display = 'inline-block';
+            mContent.classList.remove('modal-full-width');
+            mLeft.style.display = 'flex'; // Default: Show Image Column
+
+            mName.innerText = item.name;
+
+            // --- 1. OBSERVATION LOGIC (NO IMAGE COLUMN) ---
+            if (type === 'Observation') {
+                mContent.classList.add('modal-full-width'); 
+                mLeft.style.display = 'none'; 
+                mBadge.style.display = 'none';
+
+                let headerHtml = '';
+                for (const [key, val] of Object.entries(item.meta)) {
+                    headerHtml += `<div class="obs-data-row"><span class="obs-label">${key}:</span> <span class="obs-value">${val}</span></div>`;
+                }
+                let notesHtml = `<div class="obs-notes-box"><strong>Field Notes:</strong><br><br>${item.notes}</div>`;
+
+                mQuestions.innerHTML = headerHtml + notesHtml;
+                modal.classList.add('active');
+                return;
+            }
+
+            // --- 2. ANALYTICS LOGIC (GRAPHS + TEXT, NO SIDE IMAGE) ---
+            if (type === 'Analytics') {
+                mContent.classList.add('modal-full-width'); 
+                mLeft.style.display = 'none'; 
+                mBadge.style.display = 'none';
+
+                let contentHtml = '';
+                contentHtml += `<div class="obs-notes-box">${item.text1}</div>`;
+                contentHtml += `<div class="modal-graph-grid">`;
+                item.graphs.forEach(src => {
+                    contentHtml += `<img src="${src}" onerror="this.src='https://via.placeholder.com/400x300?text=Graph+Missing'">`;
+                });
+                contentHtml += `</div>`;
+                contentHtml += `<div class="obs-notes-box">${item.text2}</div>`;
+
+                mQuestions.innerHTML = contentHtml;
+                modal.classList.add('active');
+                return;
+            }
+            
+            // --- 3. STANDARD INTERVIEW LOGIC ---
+            mImg.src = item.image;
+            if(type === 'Decathlon') {
+                mBadge.classList.add('tag-decathlon');
+                mBadge.innerText = 'DECATHLON';
+            } else {
+                mBadge.classList.add('tag-reliance');
+                mBadge.innerText = 'RELIANCE MART';
+            }
+
+            mQuestions.innerHTML = '';
+            for (const [question, answer] of Object.entries(item.answers)) {
+                mQuestions.innerHTML += `
+                    <div class="q-block">
+                        <span class="q-label">${question}</span>
+                        <div class="q-answer">${answer}</div>
+                    </div>
+                `;
+            }
+
+            modal.classList.add('active');
+        }
+
+        function closeModal() {
+            document.getElementById('modal').classList.remove('active');
+        }
+
+        // Initialize Grids
+        renderGrid(observationData, 'observation-grid', 'Observation');
+        renderGrid(analyticsData, 'analytics-grid', 'Analytics'); 
+        renderGrid(decathlonData, 'decathlon-grid', 'Decathlon');
+        renderGrid(relianceData, 'reliance-grid', 'Reliance');
+        renderGallery(); // Initialize Gallery
+
+    </script>
+</body>
+</html>
